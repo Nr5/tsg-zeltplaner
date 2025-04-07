@@ -1,0 +1,39 @@
+.{
+    .name = "dvui",
+    .version = "0.2.0",
+    .paths = .{""},
+    .dependencies = .{
+        .sdl = .{
+            .url = "git+https://github.com/david-vanderson/SDL#a0d66c2bfb70ce0119eedf8ff5b523fd36e0925f",
+            .hash = "1220d2fd0149dbba85e5f5f0f6ecf2a7ce9a2f81d66280efb9389924bb547a51a557",
+            .lazy = true,
+        },
+        .sdl3 = .{
+            .url = "git+https://github.com/castholm/SDL.git?ref=HEAD#bbc8dfb78c2a71f10b21548b58dfe5ac46cc3fef",
+            .hash = "122046c6dcdcf941e6e5b1e8fa273185d04420e56436d47b906308eaf70208222f59",
+            .lazy = true,
+        },
+        .freetype = .{
+            .url = "git+https://github.com/rohlem/freetype-update-zig#a50182dc5787a8d49dd1ad922699a1c8771aa34a",
+            .hash = "12203811b00197ba9f939a8114941bdb18d421c3fa498ec4045bc9ce0c91a5a20b9f",
+            .lazy = true,
+        },
+        .raylib = .{
+            .url = "git+https://github.com/raysan5/raylib#433cc23ea4511fbeddc0fccc597cde91f5756d59",
+            .hash = "1220d18e6fba0a609f3afb055c2876d93e19b3f54f3e2e730c3fd261efd78ccd6002",
+            .lazy = true,
+        },
+        //used in the raylib-ontop example
+       // .raygui = .{
+        //    .url = "raygui-33f16596091e8147d01f948e7125db02cfae5faa.tar.gz",
+         //   .hash = "12205f060d3476715771890d6e30bc052ca2d420dcae7875db2a4bd876ac506008a9",
+          //  .lazy = true,
+        //},
+        // required for the directx11 backend
+        .zigwin32 = .{
+            .url = "git+https://github.com/rohlem/zigwin32-update-zig#5d6055e7c8cea4c508f33c0d8641fdf1fe30f9ea",
+            .hash = "122073b611033d3660fca78fb588d2fd97bbdad96be8c688c5a00f8b85c4a5e3d871",
+            .lazy = true,
+        },
+    },
+}

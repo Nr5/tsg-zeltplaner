@@ -1,0 +1,16 @@
+pub var strbuf: [0x100]u8 = undefined;
+pub const Teilnehmer = struct {
+    vorname: [] const u8,
+    nachname: [] const u8,
+
+};
+pub const Data = struct {
+    n_teilnehmer: u16,
+    teilnehmer_list: [1024]Teilnehmer,
+};
+
+
+pub var data: Data = .{
+    .n_teilnehmer = 0,
+    .teilnehmer_list = undefined,
+};
