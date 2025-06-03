@@ -100,67 +100,13 @@ export fn strbuf_ptr() [*c]u8 {
 export fn teilnehmer_ptr() [*c]u8 {
     return @ptrCast(&zeltlager_data.teilnehmer_list);
 }
+export fn anwesenheit_ptr() [*c]u8 {
+    return @ptrCast(&zeltlager_data.anwesenheit_bitwise); }
 export fn receive_websocket(len: usize) void {
     websocket.receive(shared_mem.ser2cli[0..len]);
 }
 export fn adjust_ptrs(n_teilnehmer: u32) void {
-    for (&zeltlager_data.allergien, 0..) |*a, i| {
-        const i_8: u8 = @truncate(i);
-        a.bezeichnung = zeltlager_data.Allergien_namen[i];
-        a.key = 'A' + i_8;
-        if (a.key > 'H') a.key += 3;
-        if (a.key > 'P') a.key += 1;
-        if (a.key > 'R') a.key += 'V' - 'S';
-        a.n_teilnehmer = 0;
-    }
-    for (&zeltlager_data.zelte) |*z| {
-        z.n_teilnehmer = 0;
-    }
-    const strbuf_addr = @intFromPtr(&zeltlager_data.strbuf);
-    zeltlager_data.n_teilnehmer = @truncate(n_teilnehmer);
-    logging.log("n_teilnehmer: {}", .{n_teilnehmer}) catch unreachable;
-    for (zeltlager_data.teilnehmer_list[0..n_teilnehmer]) |*t| {
-        t.*.vorname.ptr += strbuf_addr;
-        t.*.nachname.ptr += strbuf_addr;
-        t.*.anmelder_vorname.ptr += strbuf_addr;
-        t.*.anmelder_nachname.ptr += strbuf_addr;
-        t.*.anmelder_email.ptr += strbuf_addr;
-        t.*.anmelder_telefon.ptr += strbuf_addr;
-        t.*.taschengeld.ptr += strbuf_addr;
-        t.*.geburtsdatum.ptr += strbuf_addr;
-        t.*.geschlecht.ptr += strbuf_addr;
-        t.*.anschrift.ptr += strbuf_addr;
-        t.*.tshirt_groesse.ptr += strbuf_addr;
-        t.*.bade_erlaubnis.ptr += strbuf_addr;
-        t.*.schwimmbefaehigung.ptr += strbuf_addr;
-        t.*.allergien.ptr += strbuf_addr;
-        t.*.besonderheiten.ptr += strbuf_addr;
-        t.*.anwesend.ptr += strbuf_addr;
-
-        if (t.Zelte_id < 56) {
-            const zelt = &zeltlager_data.zelte[t.*.Zelte_id];
-            zelt.*.teilnehmer[zelt.*.n_teilnehmer] = t.*.id;
-            zelt.*.n_teilnehmer += 1;
-        }
-        if (t.*.allergien.len > 0) {
-            //logging.log("{}:  ", .{t.*.id}) catch unreachable;
-            for (t.*.allergien) |a| {
-                const i: u8 = switch (a) {
-                    'A'...'H' => a - 'A',
-                    'L'...'P' => a - 'L' + 8,
-                    'R' => 13,
-                    'V' => 14,
-                    'W' => 15,
-                    else => 0,
-                };
-
-                //logging.log("{} ", .{i}) catch unreachable;
-                zeltlager_data.allergien[i].teilnehmer[zeltlager_data.allergien[i].n_teilnehmer] = @truncate(t.*.id);
-                zeltlager_data.allergien[i].n_teilnehmer += 1;
-            }
-            //logging.log("\n", .{}) catch unreachable;
-        }
-    }
+    zeltlager_data.adjust_ptrs(n_teilnehmer);
 }
 export fn js_msg() u8 {
     //    @memcpy(cli2ser[0..5],"hello");
@@ -198,16 +144,6 @@ fn update() !i32 {
     //try backend.addAllEvents(&win);
 
     try dvui_frame();
-    //try dvui.label(@src(), "test", .{}, .{ .color_text = .{ .color = dvui.Color.white } });
-
-    //var indices: []const u32 = &[_]u32{ 0, 1, 2, 0, 2, 3 };
-    //var vtx: []const dvui.Vertex = &[_]dvui.Vertex{
-    //    .{ .pos = .{ .x = 100, .y = 150 }, .uv = .{ 0.0, 0.0 }, .col = .{} },
-    //    .{ .pos = .{ .x = 200, .y = 150 }, .uv = .{ 1.0, 0.0 }, .col = .{ .g = 0, .b = 0, .a = 200 } },
-    //    .{ .pos = .{ .x = 200, .y = 250 }, .uv = .{ 1.0, 1.0 }, .col = .{ .r = 0, .b = 0, .a = 100 } },
-    //    .{ .pos = .{ .x = 100, .y = 250 }, .uv = .{ 0.0, 1.0 }, .col = .{ .r = 0, .g = 0 } },
-    //};
-    //backend.drawClippedTriangles(null, vtx, indices);
 
     const end_micros = try win.end(.{});
 
@@ -219,60 +155,10 @@ fn update() !i32 {
 }
 
 fn dvui_frame() !void {
-    //    var new_content_scale: ?f32 = null;
-    //    var old_dist: ?f32 = null;
-    //   for (dvui.events()) |*e| {
-    //       if (e.evt == .mouse and (e.evt.mouse.button == .touch0 or e.evt.mouse.button == .touch1)) {
-    //           const idx: usize = if (e.evt.mouse.button == .touch0) 0 else 1;
-    //           switch (e.evt.mouse.action) {
-    //               .press => {
-    //                   touchPoints[idx] = e.evt.mouse.p;
-    //               },
-    //               .release => {
-    //                   touchPoints[idx] = null;
-    //               },
-    //               .motion => {
-    //                   if (touchPoints[0] != null and touchPoints[1] != null) {
-    //                       e.handled = true;
-    //                       var dx: f32 = undefined;
-    //                       var dy: f32 = undefined;
-    //
-    //                       if (old_dist == null) {
-    //                           dx = touchPoints[0].?.x - touchPoints[1].?.x;
-    //                           dy = touchPoints[0].?.y - touchPoints[1].?.y;
-    //                           old_dist = @sqrt(dx * dx + dy * dy);
-    //                       }
-    //
-    //                       touchPoints[idx] = e.evt.mouse.p;
-    //
-    //                       dx = touchPoints[0].?.x - touchPoints[1].?.x;
-    //                       dy = touchPoints[0].?.y - touchPoints[1].?.y;
-    //                       const new_dist: f32 = @sqrt(dx * dx + dy * dy);
-    //
-    //                       new_content_scale = @max(0.1, win.content_scale * new_dist / old_dist.?);
-    //                   }
-    //               },
-    //               else => {},
-    //           }
-    //       }
-    //   }
-    //   const label = if (dvui.Examples.show_demo_window) "Hide Demo Window" else "Show Demo Window 23";
     {
         var box = try dvui.box(@src(), .horizontal, .{});
         defer box.deinit();
-        //       if (try dvui.button(@src(), label, .{}, .{})) {
-        //           dvui.Examples.show_demo_window = !dvui.Examples.show_demo_window;
-        //       }
-        //       if (try dvui.Theme.picker(@src(), .{})) {
-        //           @memcpy(shared_mem.cli2ser[0.."theme changed".len], "theme changed");
-        //       }
     }
     try dvui.Examples.demo();
     try ui.layout();
-    //    const websocket_message: [7]u8 = .{ 0, 0, 3, 3, 4, 0, 0 };
-    //    wasm_websocket_write((&websocket_message).ptr, websocket_message.len);
-
-    //    if (new_content_scale) |ns| {
-    //        win.content_scale = ns;
-    //    }
 }

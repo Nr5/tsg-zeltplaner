@@ -2,6 +2,9 @@ const std = @import("std");
 pub var log_buf: [0x1000]u8 = undefined;
 pub var log_buf_len: u16 = 0;
 pub inline fn log(fmt: []const u8, data: anytype) !void {
+    if (comptime @import("builtin").os.tag == .linux or @import("builtin").os.tag == .windows) {
+        std.debug.print(fmt,data);
+    }
     if (log_buf_len > 0xff) {
         const first_newline = std.mem.indexOfScalar(u8, log_buf[0..log_buf_len], '\n');
         const position = if (first_newline) |fin| fin + 1 else 100;

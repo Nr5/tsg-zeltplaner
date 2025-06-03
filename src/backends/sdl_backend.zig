@@ -40,6 +40,7 @@ pub const InitOptions = struct {
     /// Set the maximum size of the window
     max_size: ?dvui.Size = null,
     vsync: bool,
+    maximized: bool,
     /// The application title to display
     title: [:0]const u8,
     /// content of a PNG image (or any other format stb_image can load)
@@ -59,13 +60,14 @@ pub fn initWindow(options: InitOptions) !SDLBackend {
     }
 
     var window: *c.SDL_Window = undefined;
+    const maxflag: c_int = if (options.maximized) c.SDL_WINDOW_MAXIMIZED else @intCast(0);
     if (sdl3) {
-        window = c.SDL_CreateWindow(options.title, @as(c_int, @intFromFloat(options.size.w)), @as(c_int, @intFromFloat(options.size.h)), c.SDL_WINDOW_HIGH_PIXEL_DENSITY | c.SDL_WINDOW_RESIZABLE) orelse {
+        window = c.SDL_CreateWindow(options.title, @as(c_int, @intFromFloat(options.size.w)), @as(c_int, @intFromFloat(options.size.h)), @intCast(c.SDL_WINDOW_ALLOW_HIGHDPI | c.SDL_WINDOW_RESIZABLE | maxflag)) orelse {
             dvui.log.err("SDL: Failed to open window: {s}", .{c.SDL_GetError()});
             return error.BackendError;
         };
     } else {
-        window = c.SDL_CreateWindow(options.title, c.SDL_WINDOWPOS_UNDEFINED, c.SDL_WINDOWPOS_UNDEFINED, @as(c_int, @intFromFloat(options.size.w)), @as(c_int, @intFromFloat(options.size.h)), c.SDL_WINDOW_ALLOW_HIGHDPI | c.SDL_WINDOW_RESIZABLE) orelse {
+        window = c.SDL_CreateWindow(options.title, c.SDL_WINDOWPOS_UNDEFINED, c.SDL_WINDOWPOS_UNDEFINED, @as(c_int, @intFromFloat(options.size.w)), @as(c_int, @intFromFloat(options.size.h)), @intCast(c.SDL_WINDOW_ALLOW_HIGHDPI | c.SDL_WINDOW_RESIZABLE | maxflag)) orelse {
             dvui.log.err("SDL: Failed to open window: {s}", .{c.SDL_GetError()});
             return error.BackendError;
         };

@@ -2,6 +2,7 @@ let ws;
 let lastmessage = "";
 let wasm_strbuf;
 let teilnehmer_buf;
+let anwesenheit_buf;
 const cmd_change_zelt=0;
 const cmd_grab_teilnehmer=1;
 const cmd_drop_teilnehmer=2;
@@ -168,7 +169,7 @@ function dvui(canvasId, wasmFile) {
 
         uniform sampler2D uSampler;
         uniform bool useTex;
-
+		vec3 light = normalize(vec3(-5,-2,-1))
         void main() {
             if (useTex) {
                 gl_FragColor = texture2D(uSampler, vTextureCoord) * vColor;
@@ -589,6 +590,7 @@ let version_ptr;
 		ser2cli=result.instance.exports.ser2cli_ptr();
 		wasm_strbuf = result.instance.exports.strbuf_ptr();
 		teilnehmer_buf = result.instance.exports.teilnehmer_ptr();
+		anwesenheit_buf = result.instance.exports.anwesenheit_ptr();
 		version_ptr = result.instance.exports.version_ptr();
 		console.log("teilnehmer_buf:", teilnehmer_buf);
 		console.log("wasm_strbuf:", wasm_strbuf);
@@ -630,7 +632,15 @@ let version_ptr;
 				console.log("n_teilnehmer", (message.length-8) / (35*4));
 				wasmResult.instance.exports.adjust_ptrs((message.length-8)/(35*4));
 			}
+
+			else if (message[0] == 11) {
+					console.log("anwesenheit: mlen: ", message.length);
+					var anwesenheit = new Uint8Array(wasmResult.instance.exports.memory.buffer, anwesenheit_buf);
+					anwesenheit.set(message.slice(4,message.length))
+			}
+
 			else {
+				console.log("message received: ", message[0]);
 				xyz = new Uint8Array(wasmResult.instance.exports.memory.buffer, ser2cli);
 				xyz.set(message);
 				result.instance.exports.receive_websocket(message.length);

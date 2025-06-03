@@ -30,6 +30,7 @@ pub fn build(b: *std.Build) !void {
 
     const dvui_sdl = addDvuiModule(b, target, optimize, link_backend, .sdl, linux_display_backend);
     addExample(b, target, optimize, "sdl-standalone", dvui_sdl);
+    addExample(b, target, optimize, "sdl-my_webapp", dvui_sdl);
     addExample(b, target, optimize, "sdl-ontop", dvui_sdl);
 
     if (target.result.os.tag != .macos) {
@@ -41,6 +42,7 @@ pub fn build(b: *std.Build) !void {
 
     if (target.result.os.tag == .windows) {
         const dvui_dx11 = addDvuiModule(b, target, optimize, link_backend, .dx11, linux_display_backend);
+        addExample(b, target, optimize, "windows-my_webapp", dvui_dx11);
         addExample(b, target, optimize, "dx11-ontop", dvui_dx11);
         addExample(b, target, optimize, "dx11-standalone", dvui_dx11);
     }
@@ -106,6 +108,7 @@ pub fn build(b: *std.Build) !void {
             "store_config",
             "strbuf_ptr",
             "teilnehmer_ptr",
+            "anwesenheit_ptr",
             "adjust_ptrs",
             "version_ptr",
             "receive_websocket",
@@ -336,7 +339,8 @@ fn addExample(
 ) void {
     const exe = b.addExecutable(.{
         .name = name,
-        .root_source_file = b.path("examples/" ++ name ++ ".zig"),
+        .root_source_file = b.path("src/my_webapp/" ++ name ++ ".zig"),
+//        .root_source_file = b.path("./src/my_webapp/" ++ name ++ ".zig"),
         .target = target,
         .optimize = optimize,
         .win32_manifest = b.path("./src/main.manifest"),
